@@ -1,0 +1,55 @@
+name: Bug report
+description: Something does not work or behaves differently from the docs
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please read the [troubleshooting table](https://github.com/6107/cpy6107/blob/main/docs/GETTING-STARTED.md#6-troubleshooting) first.
+  - type: input
+    id: version
+    attributes:
+      label: cpy6107 version
+      description: "`pip show cpy6107` or `git describe`"
+      placeholder: 2027.0.0a8.post1
+    validations: {required: true}
+  - type: input
+    id: wpilib
+    attributes:
+      label: wpilib / robotpy version
+      description: "`pip show wpilib`"
+      placeholder: 2027.0.0a8
+    validations: {required: true}
+  - type: input
+    id: platform
+    attributes:
+      label: OS, glibc and Python
+      description: "`uname -a`, `ldd --version | head -1`, `python --version` (or Docker image)"
+    validations: {required: true}
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options: [wheel from dist/, pip from PyPI, source / editable install, Docker image, other]
+    validations: {required: true}
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options: [Simulation, Unit tests, SystemCore / real robot, Build / install]
+    validations: {required: true}
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations: {required: true}
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal robot code or steps to reproduce
+      render: python
+    validations: {required: true}
+  - type: textarea
+    id: output
+    attributes:
+      label: Full output / traceback
+      render: text

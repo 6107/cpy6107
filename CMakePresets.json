@@ -59,6 +59,30 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "g++-14",
         "CPY6107_ENABLE_COVERAGE": "ON",
+        "CPY6107_BUILD_PYTHON": "ON"
+      }
+    },
+    {
+      "name": "linux-asan",
+      "displayName": "Linux GCC 14 (Debug + ASan/UBSan)",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++-14",
+        "CPY6107_SANITIZE": "address;undefined",
+        "CPY6107_BUILD_PYTHON": "ON"
+      }
+    },
+    {
+      "name": "linux-tsan",
+      "displayName": "Linux GCC 14 (Debug + TSan, C++ tests only)",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-tsan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++-14",
+        "CPY6107_SANITIZE": "thread",
         "CPY6107_BUILD_PYTHON": "OFF"
       }
     },
@@ -94,37 +118,349 @@
         "CPY6107_BUILD_PYTHON": "OFF",
         "CPY6107_ENABLE_SIM": "OFF"
       }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "base",
+      "displayName": "Windows Debug (UNVERIFIED)",
+      "binaryDir": "${sourceDir}/build/windows-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "base",
+      "displayName": "Windows Release (UNVERIFIED)",
+      "binaryDir": "${sourceDir}/build/windows-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "linux-debug", "configurePreset": "linux-debug" },
-    { "name": "linux-release", "configurePreset": "linux-release" },
-    { "name": "linux-clang-debug", "configurePreset": "linux-clang-debug" },
-    { "name": "linux-coverage", "configurePreset": "linux-coverage" },
-    { "name": "sim-debug", "configurePreset": "sim-debug" },
-    { "name": "sim-release", "configurePreset": "sim-release" },
-    { "name": "systemcore-arm64", "configurePreset": "systemcore-arm64" }
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "linux-clang-debug",
+      "configurePreset": "linux-clang-debug"
+    },
+    {
+      "name": "linux-coverage",
+      "configurePreset": "linux-coverage"
+    },
+    {
+      "name": "sim-debug",
+      "configurePreset": "sim-debug"
+    },
+    {
+      "name": "sim-release",
+      "configurePreset": "sim-release"
+    },
+    {
+      "name": "systemcore-arm64",
+      "configurePreset": "systemcore-arm64"
+    },
+    {
+      "name": "linux-debug-dev",
+      "configurePreset": "linux-debug",
+      "targets": [
+        "dev"
+      ]
+    },
+    {
+      "name": "linux-debug-lint",
+      "configurePreset": "linux-debug",
+      "targets": [
+        "lint"
+      ]
+    },
+    {
+      "name": "linux-debug-check",
+      "configurePreset": "linux-debug",
+      "targets": [
+        "check"
+      ]
+    },
+    {
+      "name": "linux-debug-format",
+      "configurePreset": "linux-debug",
+      "targets": [
+        "format"
+      ]
+    },
+    {
+      "name": "linux-clang-debug-dev",
+      "configurePreset": "linux-clang-debug",
+      "targets": [
+        "dev"
+      ]
+    },
+    {
+      "name": "linux-clang-debug-lint",
+      "configurePreset": "linux-clang-debug",
+      "targets": [
+        "lint"
+      ]
+    },
+    {
+      "name": "linux-clang-debug-check",
+      "configurePreset": "linux-clang-debug",
+      "targets": [
+        "check"
+      ]
+    },
+    {
+      "name": "linux-clang-debug-format",
+      "configurePreset": "linux-clang-debug",
+      "targets": [
+        "format"
+      ]
+    },
+    {
+      "name": "linux-coverage-report",
+      "configurePreset": "linux-coverage",
+      "targets": [
+        "coverage"
+      ]
+    },
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows-debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-debug-lint",
+      "configurePreset": "windows-debug",
+      "targets": [
+        "lint"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-asan",
+      "configurePreset": "linux-asan"
+    },
+    {
+      "name": "linux-tsan",
+      "configurePreset": "linux-tsan"
+    }
   ],
   "testPresets": [
     {
       "name": "linux-debug",
       "configurePreset": "linux-debug",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
       "name": "linux-clang-debug",
       "configurePreset": "linux-clang-debug",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
       "name": "linux-coverage",
       "configurePreset": "linux-coverage",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
       "name": "sim-debug",
       "configurePreset": "sim-debug",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-asan",
+      "configurePreset": "linux-asan",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-tsan",
+      "configurePreset": "linux-tsan",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-debug-lint"
+        },
+        {
+          "type": "test",
+          "name": "linux-debug"
+        }
+      ]
+    },
+    {
+      "name": "linux-clang-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-clang-debug-lint"
+        },
+        {
+          "type": "test",
+          "name": "linux-clang-debug"
+        }
+      ]
+    },
+    {
+      "name": "linux-coverage-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-coverage"
+        },
+        {
+          "type": "build",
+          "name": "linux-coverage"
+        },
+        {
+          "type": "build",
+          "name": "linux-coverage-report"
+        }
+      ]
+    },
+    {
+      "name": "windows-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "windows-debug"
+        },
+        {
+          "type": "build",
+          "name": "windows-debug"
+        },
+        {
+          "type": "build",
+          "name": "windows-debug-lint"
+        },
+        {
+          "type": "test",
+          "name": "windows-debug"
+        }
+      ]
+    },
+    {
+      "name": "linux-asan-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-asan"
+        },
+        {
+          "type": "build",
+          "name": "linux-asan"
+        },
+        {
+          "type": "test",
+          "name": "linux-asan"
+        }
+      ]
+    },
+    {
+      "name": "linux-tsan-ci",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-tsan"
+        },
+        {
+          "type": "build",
+          "name": "linux-tsan"
+        },
+        {
+          "type": "test",
+          "name": "linux-tsan"
+        }
+      ]
     }
   ]
 }

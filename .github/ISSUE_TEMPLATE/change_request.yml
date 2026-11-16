@@ -1,0 +1,32 @@
+name: Change request
+description: Ask for a new feature or a change to existing behaviour or API
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe your robot code or situation, not only the solution.
+    validations: {required: true}
+  - type: textarea
+    id: today
+    attributes:
+      label: What do you do today (workaround)?
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like instead?
+      description: Example code of how you would like to use it is very helpful.
+    validations: {required: true}
+  - type: input
+    id: version
+    attributes:
+      label: cpy6107 and wpilib versions
+      placeholder: cpy6107 2027.0.0a8.post1 / wpilib 2027.0.0a8
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - label: This would change existing Python API names or behaviour (breaking)
+        - label: I am willing to send a pull request

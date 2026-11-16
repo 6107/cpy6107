@@ -10,8 +10,8 @@
 #
 # Search order for the `native` directory:
 #   1. ROBOTPY_NATIVE_DIR (cache variable)
-#   2. <source dir>/.venv/lib/python*/site-packages/native
-#   3. the site-packages of the Python interpreter found by find_package(Python)
+#   2. the site-packages of the Python interpreter found by find_package(Python)
+#   3. <source dir>/.venv/lib/python*/site-packages/native
 #
 # Result variables: RobotpyNative_FOUND, ROBOTPY_NATIVE_DIR, RobotpyNative_VERSION (0 if unknown)
 
@@ -29,9 +29,6 @@ endfunction()
 
 if(NOT ROBOTPY_NATIVE_DIR)
     set(_candidates)
-    file(GLOB _venv_candidates "${CMAKE_SOURCE_DIR}/.venv/lib/python*/site-packages/native")
-    list(APPEND _candidates ${_venv_candidates})
-
     if(Python_EXECUTABLE)
         set(_python "${Python_EXECUTABLE}")
     elseif(Python3_EXECUTABLE)
@@ -48,6 +45,8 @@ if(NOT ROBOTPY_NATIVE_DIR)
             list(APPEND _candidates "${_purelib}/native")
         endif()
     endif()
+    file(GLOB _venv_candidates "${CMAKE_SOURCE_DIR}/.venv/lib/python*/site-packages/native")
+    list(APPEND _candidates ${_venv_candidates})
 
     foreach(_dir IN LISTS _candidates)
         _robotpy_native_is_valid("${_dir}" _ok)
@@ -63,7 +62,7 @@ _robotpy_native_is_valid("${ROBOTPY_NATIVE_DIR}" _native_ok)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(RobotpyNative
     REQUIRED_VARS ROBOTPY_NATIVE_DIR _native_ok
-    FAIL_MESSAGE "robotpy-native WPILib not found. Install the robotpy wheels into a venv (uv pip install --prerelease=allow wpilib==2027.0.0a6) or set ROBOTPY_NATIVE_DIR."
+    FAIL_MESSAGE "robotpy-native WPILib not found. Install the robotpy wheels into a venv (uv pip install --prerelease=allow wpilib==2027.0.0a8) or set ROBOTPY_NATIVE_DIR."
 )
 
 if(NOT RobotpyNative_FOUND)
@@ -79,17 +78,29 @@ set(_robotpy_libs
     "ntcore|ntcore|ntcore"
     "wpinet|wpinet|wpinet"
     "datalog|datalog|datalog"
+    # Present only in some releases (a8: libwpilibc needs telemetry and tunables); optional here.
+    "tunables|tunables|tunables|OPTIONAL"
+    "telemetry|telemetry|telemetry|OPTIONAL"
 )
 
 set(_all_targets)
 set(ROBOTPY_NATIVE_LIB_DIRS)
+set(ROBOTPY_NATIVE_PACKAGES)
 foreach(_entry IN LISTS _robotpy_libs)
     string(REPLACE "|" ";" _parts "${_entry}")
     list(GET _parts 0 _target)
     list(GET _parts 1 _pkg)
     list(GET _parts 2 _stem)
+    list(LENGTH _parts _nparts)
+    set(_optional FALSE)
+    if(_nparts GREATER 3)
+        set(_optional TRUE)
+    endif()
 
     set(_lib "${ROBOTPY_NATIVE_DIR}/${_pkg}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}${_stem}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    if(NOT EXISTS "${_lib}" AND _optional)
+        continue()
+    endif()
     if(NOT EXISTS "${_lib}")
         message(FATAL_ERROR "RobotpyNative: expected library not found: ${_lib}")
     endif()
@@ -106,6 +117,7 @@ foreach(_entry IN LISTS _robotpy_libs)
     endif()
     list(APPEND _all_targets wpilib::${_target})
     list(APPEND ROBOTPY_NATIVE_LIB_DIRS "${ROBOTPY_NATIVE_DIR}/${_pkg}/lib")
+    list(APPEND ROBOTPY_NATIVE_PACKAGES "${_pkg}")
 endforeach()
 
 if(NOT TARGET wpilib::all)

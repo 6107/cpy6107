@@ -1,0 +1,68 @@
+# Release: tag vX -> build sdist + wheel in the glibc 2.41 image -> TestPyPI -> PyPI.
+# Uses PyPI trusted publishing (OIDC); no tokens are stored in the repository.
+# NOT YET EXECUTED. One-time setup (see docs/RELEASING.md): register this workflow as a trusted
+# publisher on pypi.org and test.pypi.org, and create the `testpypi` and `pypi` environments
+# (add required reviewers to `pypi`).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        type: choice
+        options: [none, testpypi]
+        default: none
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build sdist and wheel (WPILib from pyproject)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag, version and WPILib pin agree
+        run: python3 scripts/check_release.py "${GITHUB_REF_NAME}"
+
+      - name: Build in the glibc 2.41 image
+        run: docker/run.sh docker/build-dist.sh
+
+      - name: Test the wheel in a clean container
+        run: docker/test-wheel.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+          if-no-files-found: error
+
+  testpypi:
+    needs: build
+    if: github.event_name == 'push' || inputs.target == 'testpypi'
+    runs-on: ubuntu-24.04
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist }
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    needs: testpypi
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist }
+      - uses: pypa/gh-action-pypi-publish@release/v1

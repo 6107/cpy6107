@@ -1,18 +1,41 @@
+// ------------------------------------------------------------------------
+//      o-o      o                o
+//     /         |                |
+//    O     o  o O-o  o-o o-o     |  oo o--o o-o o-o
+//     \    |  | |  | |-' |   \   o | | |  |  /   /
+//      o-o o--O o-o  o-o o    o-o  o-o-o--O o-o o-o
+//             |                           |
+//          o--o                        o--o
+//                        o--o      o         o
+//                        |   |     |         |  o
+//                        O-Oo  o-o O-o  o-o -o-    o-o o-o
+//                        |  \  | | |  | | |  |  | |     \
+//                        o   o o-o o-o  o-o  o  |  o-o o-o
+//
+//    Jemison High School - Huntsville Alabama
+// ------------------------------------------------------------------------
+
 #include "cpy6107/framework/timed_command_robot.hpp"
 
 #include <wpi/driverstation/RobotState.hpp>
 #include <wpi/driverstation/internal/DriverStationBackend.hpp>
 #include <wpi/hal/DriverStation.h>
 #include <wpi/hal/DriverStation.hpp>
+#if CPY6107_WPILIB_ALPHA6
 #include <wpi/hal/DriverStationTypes.h>
+#include <wpi/smartdashboard/SmartDashboard.hpp>
+#else
+#include <wpi/hal/DriverStationTypes.hpp>
+#include <wpi/tunables/TunableRegistry.hpp>
+#endif
 #include <wpi/hal/Notifier.hpp>
 #include <wpi/hal/UsageReporting.hpp>
 #include <wpi/nt/NetworkTableInstance.hpp>
-#include <wpi/smartdashboard/SmartDashboard.hpp>
 #include <wpi/system/Errors.hpp>
 
 #include <cstdint>
 #include <cstdio>
+#include <exception>
 #include <stdexcept>
 #include <utility>
 
@@ -26,11 +49,16 @@ using wpi::units::second_t;
 
 namespace {
 
-// ---- release-specific (WPILib 2027 alpha-6): see wpilib_compat.hpp ---------------------------
+// ---- release-specific: see wpilib_compat.hpp --------------------------------------------------
 
 void UpdateTelemetry(wpi::Watchdog& watchdog) {
+#if CPY6107_WPILIB_ALPHA6
     wpi::SmartDashboard::UpdateValues();
     watchdog.AddEpoch("SmartDashboard::UpdateValues()");
+#else
+    wpi::tunables::TunableRegistry::Update();
+    watchdog.AddEpoch("TunableRegistry::Update()");
+#endif
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -147,18 +175,53 @@ void TimedCommandRobot::BeforeUserLoop() {}
 
 void TimedCommandRobot::AfterUserLoop(const LoopTiming& /*timing*/) {}
 
+void TimedCommandRobot::SetHookErrorPolicy(HookErrorPolicy policy) {
+    hook_error_policy_ = policy;
+}
+
+HookErrorPolicy TimedCommandRobot::GetHookErrorPolicy() const {
+    return hook_error_policy_;
+}
+
+std::uint64_t TimedCommandRobot::GetHookErrorCount() const {
+    return hook_error_count_;
+}
+
+void TimedCommandRobot::SetOverrunCallback(std::function<void(const OverrunInfo&)> callback) {
+    overrun_callback_ = std::move(callback);
+}
+
+template <typename F>
+void TimedCommandRobot::RunHook(const char* name, const F& hook) {
+    try {
+        hook();
+    } catch (const std::exception& e) {
+        if (hook_error_policy_ == HookErrorPolicy::kStop) {
+            throw;
+        }
+        ++hook_error_count_;
+        WPILIB_ReportError(wpi::err::Error, "{} threw: {}", name, e.what());
+    }
+}
+
 void TimedCommandRobot::ExecuteLoopCycle() {
     const auto before_start = compat::MonotonicNow();
-    BeforeUserLoop();
+    RunHook("before_user_loop", [this] { BeforeUserLoop(); });
     const auto user_start = compat::MonotonicNow();
     LoopBody();
     const auto user_end = compat::MonotonicNow();
-    AfterUserLoop(
-        LoopTiming{.pre_user_time = user_start - before_start, .user_time = user_end - user_start});
+    if (overrun_callback_ && watchdog_.IsExpired()) {
+        const OverrunInfo info{.loop_time = user_end - before_start,
+                               .timeout = watchdog_.GetTimeout()};
+        RunHook("overrun callback", [this, &info] { overrun_callback_(info); });
+    }
+    const LoopTiming timing{.pre_user_time = user_start - before_start,
+                            .user_time = user_end - user_start};
+    RunHook("after_user_loop", [this, &timing] { AfterUserLoop(timing); });
 }
 
-// Mirrors wpi::IterativeRobotBase::LoopFunc() (alpha-6) with watchdog_ in place of the private
-// base watchdog. Keep in sync with upstream when raising the supported WPILib release.
+// Mirrors wpi::IterativeRobotBase::LoopFunc() (alpha-6 / alpha-8) with watchdog_ in place of the
+// private base watchdog. scripts/check_loopfunc.py diffs it against upstream.
 void TimedCommandRobot::LoopBody() {
     wpi::internal::DriverStationBackend::RefreshData();
     watchdog_.Reset();

@@ -1,3 +1,20 @@
+// ------------------------------------------------------------------------
+//      o-o      o                o
+//     /         |                |
+//    O     o  o O-o  o-o o-o     |  oo o--o o-o o-o
+//     \    |  | |  | |-' |   \   o | | |  |  /   /
+//      o-o o--O o-o  o-o o    o-o  o-o-o--O o-o o-o
+//             |                           |
+//          o--o                        o--o
+//                        o--o      o         o
+//                        |   |     |         |  o
+//                        O-Oo  o-o O-o  o-o -o-    o-o o-o
+//                        |  \  | | |  | | |  |  | |     \
+//                        o   o o-o o-o  o-o  o  |  o-o o-o
+//
+//    Jemison High School - Huntsville Alabama
+// ------------------------------------------------------------------------
+
 #pragma once
 
 #include "cpy6107/framework/wpilib_compat.hpp"
@@ -26,6 +43,18 @@ enum class FrameworkError : std::uint8_t {
 struct LoopTiming {
     std::chrono::nanoseconds pre_user_time{}; // BeforeUserLoop()
     std::chrono::nanoseconds user_time{};     // mode periodic + RobotPeriodic + sim periodic
+};
+
+// What to do when BeforeUserLoop(), AfterUserLoop() or the overrun callback throws.
+enum class HookErrorPolicy : std::uint8_t {
+    kLogAndContinue, // report the error, count it, keep the robot loop running (default)
+    kStop,           // rethrow out of StartCompetition()
+};
+
+// Describes one loop cycle that exceeded the watchdog timeout.
+struct OverrunInfo {
+    std::chrono::nanoseconds loop_time{}; // BeforeUserLoop() + user loop body
+    wpi::units::second_t timeout{0.0};    // watchdog timeout in effect
 };
 
 // Pure C++ alternative to a std::function for the command scheduler: implement Run() to call
@@ -95,6 +124,17 @@ class TimedCommandRobot : public wpi::IterativeRobotBase {
     // IterativeRobotBase::PrintWatchdogEpochs() prints the base's unused watchdog; use this one.
     void PrintLoopWatchdogEpochs();
 
+    // Policy for exceptions thrown by BeforeUserLoop/AfterUserLoop and the overrun callback.
+    // Configure before StartCompetition().
+    void SetHookErrorPolicy(HookErrorPolicy policy);
+    [[nodiscard]] HookErrorPolicy GetHookErrorPolicy() const;
+    // Number of hook exceptions swallowed under kLogAndContinue.
+    [[nodiscard]] std::uint64_t GetHookErrorCount() const;
+
+    // Called on the robot thread after a cycle whose loop watchdog expired, in addition to the
+    // standard error report. Pass an empty function to clear.
+    void SetOverrunCallback(std::function<void(const OverrunInfo&)> callback);
+
     // Monotonic time at the start of the current periodic callback.
     [[nodiscard]] std::chrono::nanoseconds GetLoopStartTime() const;
 
@@ -107,12 +147,17 @@ class TimedCommandRobot : public wpi::IterativeRobotBase {
     void ExecuteLoopCycle();
     void LoopBody();
     void ReportLoopOverrun() const;
+    template <typename F>
+    void RunHook(const char* name, const F& hook);
 
     wpi::internal::PeriodicPriorityQueue callbacks_;
     std::atomic<HAL_NotifierHandle> notifier_{HAL_INVALID_HANDLE};
     compat::MonotonicDuration start_time_{};
     wpi::Watchdog watchdog_;
     std::function<void()> scheduler_;
+    std::function<void(const OverrunInfo&)> overrun_callback_;
+    HookErrorPolicy hook_error_policy_ = HookErrorPolicy::kLogAndContinue;
+    std::uint64_t hook_error_count_ = 0;
     int last_mode_ = -1;
     bool called_ds_connected_ = false;
 };

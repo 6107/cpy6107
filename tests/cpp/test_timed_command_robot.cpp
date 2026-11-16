@@ -15,7 +15,9 @@
 #include "test_harness.hpp"
 
 using cpy6107::framework::FrameworkError;
+using cpy6107::framework::HookErrorPolicy;
 using cpy6107::framework::LoopTiming;
+using cpy6107::framework::OverrunInfo;
 using cpy6107::framework::SchedulerHook;
 using cpy6107::framework::TimedCommandRobot;
 using wpi::units::second_t;
@@ -29,6 +31,8 @@ thread_local bool g_tracking = false;
 thread_local std::size_t g_allocations = 0;
 } // namespace
 
+// Sanitizer runtimes replace operator new/delete themselves, so counting is disabled there.
+#ifndef CPY6107_SANITIZED
 // NOLINTBEGIN(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,misc-new-delete-overloads)
 void* operator new(std::size_t size) {
     if (g_tracking) {
@@ -47,6 +51,7 @@ void operator delete(void* ptr, std::size_t /*size*/) noexcept {
     std::free(ptr);
 }
 // NOLINTEND(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,misc-new-delete-overloads)
+#endif
 
 namespace {
 
@@ -396,6 +401,68 @@ TEST(LoopOverrunIsReportedAndLoopKeepsRunning) {
     CHECK(robot.GetWatchdogTimeout() == second_t{0.000001});
 }
 
+// ---- hook errors and overrun callback
+// ---------------------------------------------------------------------------
+
+namespace {
+class ThrowingRobot : public TimedCommandRobot {
+  public:
+    std::atomic<int> before{0};
+    std::atomic<int> after{0};
+
+  protected:
+    void BeforeUserLoop() override {
+        ++before;
+        throw std::runtime_error("before failed");
+    }
+    void AfterUserLoop(const LoopTiming& /*timing*/) override { ++after; }
+};
+} // namespace
+
+TEST(HookErrorsAreLoggedAndCountedByDefault) {
+    ThrowingRobot robot;
+    CHECK(robot.GetHookErrorPolicy() == HookErrorPolicy::kLogAndContinue);
+    {
+        const RobotRunner runner{robot};
+        CHECK(WaitUntil([&] { return robot.after.load() >= 3; }));
+    }
+    CHECK(robot.GetHookErrorCount() >= 3);
+}
+
+TEST(StopPolicyRethrowsOutOfStartCompetition) {
+    ThrowingRobot robot;
+    robot.SetHookErrorPolicy(HookErrorPolicy::kStop);
+    bool threw = false;
+    std::thread thread{[&] {
+        try {
+            robot.StartCompetition();
+        } catch (const std::runtime_error&) {
+            threw = true;
+        }
+    }};
+    thread.join();
+    CHECK(threw);
+    CHECK(robot.GetHookErrorCount() == 0);
+}
+
+TEST(OverrunCallbackReceivesTimeoutAndLoopTime) {
+    ProbeRobot robot;
+    CHECK(robot.SetWatchdogTimeout(second_t{0.000001}).has_value());
+    robot.use_epochs = true;
+    std::atomic<int> calls{0};
+    std::atomic<std::int64_t> loop_ns{0};
+    robot.SetOverrunCallback([&](const OverrunInfo& info) {
+        loop_ns = info.loop_time.count();
+        CHECK(info.timeout == second_t{0.000001});
+        ++calls;
+    });
+    {
+        const RobotRunner runner{robot};
+        CHECK(WaitUntil([&] { return calls.load() >= 2; }));
+    }
+    CHECK(loop_ns.load() > 0);
+}
+
 // ---- real-time determinism
 // -----------------------------------------------------------------------
 
@@ -411,5 +478,7 @@ TEST(LoopBodyAllocationsStayWithinWpilibEpochBudget) {
     // The remaining allocations come from wpi::Tracer::AddEpoch (std::string epoch names inside
     // WPILib's watchdog), one per epoch per cycle: this is an upstream cost, see docs/PLAN.md.
     // The bound guards against this library adding allocations of its own.
+#ifndef CPY6107_SANITIZED
     CHECK(robot.max_allocations.load() <= kMaxWpilibEpochAllocations);
+#endif
 }

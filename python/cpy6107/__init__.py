@@ -1,3 +1,20 @@
+# ------------------------------------------------------------------------ #
+#      o-o      o                o                                         #
+#     /         |                |                                         #
+#    O     o  o O-o  o-o o-o     |  oo o--o o-o o-o                        #
+#     \    |  | |  | |-' |   \   o | | |  |  /   /                         #
+#      o-o o--O o-o  o-o o    o-o  o-o-o--O o-o o-o                        #
+#             |                           |                                #
+#          o--o                        o--o                                #
+#                        o--o      o         o                             #
+#                        |   |     |         |  o                          #
+#                        O-Oo  o-o O-o  o-o -o-    o-o o-o                 #
+#                        |  \  | | |  | | |  |  | |     \                  #
+#                        o   o o-o o-o  o-o  o  |  o-o o-o                 #
+#                                                                          #
+#    Jemison High School - Huntsville Alabama                              #
+# ------------------------------------------------------------------------ #
+
 from __future__ import annotations
 
 import os
@@ -14,9 +31,11 @@ if sys.platform == "win32":
 # loader reuses them (and so both share one HAL / NetworkTables instance).
 import wpilib as _wpilib  # noqa: F401
 
-from ._cpy6107 import LoopTiming, TimedCommandRobot
+from ._cpy6107 import HookErrorPolicy, LoopTiming, OverrunInfo, TimedCommandRobot
 
 __all__ = [
+    "HookErrorPolicy",
     "LoopTiming",
+    "OverrunInfo",
     "TimedCommandRobot",
 ]
