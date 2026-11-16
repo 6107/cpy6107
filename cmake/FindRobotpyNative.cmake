@@ -111,6 +111,11 @@ foreach(_entry IN LISTS _robotpy_libs)
             IMPORTED_LOCATION "${_lib}"
             INTERFACE_INCLUDE_DIRECTORIES "${ROBOTPY_NATIVE_DIR}/${_pkg}/include"
         )
+        if(WIN32)
+            # The wheels ship an import library next to each DLL; MSVC links against that.
+            set_property(TARGET wpilib::${_target} PROPERTY
+                IMPORTED_IMPLIB "${ROBOTPY_NATIVE_DIR}/${_pkg}/lib/${_stem}.lib")
+        endif()
         # Headers of the robotpy wheels are third-party: keep them out of warning/clang-tidy scope.
         set_property(TARGET wpilib::${_target} PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
             "${ROBOTPY_NATIVE_DIR}/${_pkg}/include")
