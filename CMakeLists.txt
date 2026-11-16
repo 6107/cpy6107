@@ -120,6 +120,10 @@ if(CPY6107_BUILD_FRAMEWORK OR CPY6107_BUILD_PYTHON)
     )
     target_link_libraries(cpy6107_framework PUBLIC wpilib::all)
     set_target_properties(cpy6107_framework PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    if(MSVC)
+        # WPILib headers use __VA_OPT__, which needs the conforming preprocessor.
+        target_compile_options(cpy6107_framework PUBLIC /Zc:preprocessor /Zc:__cplusplus /utf-8)
+    endif()
     cpy6107_set_warnings(cpy6107_framework)
 endif()
 
