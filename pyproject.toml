@@ -46,6 +46,10 @@ dev = [
     "pip-audit>=2.7.0",
 ]
 
+[tool.uv]
+# robotpy/WPILib 2027 releases are alphas; let uv resolve them (pip needs --pre).
+prerelease = "allow"
+
 [tool.scikit-build]
 wheel.packages = ["python/cpy6107"]
 cmake.version = ">=3.28"

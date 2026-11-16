@@ -1,4 +1,14 @@
 # cpy6107
+
+[![CI](https://github.com/6107/cpy6107/actions/workflows/ci.yml/badge.svg)](https://github.com/6107/cpy6107/actions/workflows/ci.yml)
+[![Lint](https://github.com/6107/cpy6107/actions/workflows/lint.yml/badge.svg)](https://github.com/6107/cpy6107/actions/workflows/lint.yml)
+[![Security](https://github.com/6107/cpy6107/actions/workflows/security.yml/badge.svg)](https://github.com/6107/cpy6107/actions/workflows/security.yml)
+[![Release](https://github.com/6107/cpy6107/actions/workflows/release.yml/badge.svg)](https://github.com/6107/cpy6107/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/6107/cpy6107)](LICENSE)
+![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
+![Python 3.14](https://img.shields.io/badge/python-3.14-blue)
+![WPILib 2027.0.0a8](https://img.shields.io/badge/WPILib-2027.0.0a8-green)
+
 C/C++ specialized classes for the CyberJagzz 6107 FRC Robot focused on providing C/C++ where needed in our robotpy robots.
 
 Feel free to use anything in this project that you find useful.
