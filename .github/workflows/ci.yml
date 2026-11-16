@@ -1,0 +1,137 @@
+name: FRC 2027 Multi-OS Simulation & SystemCore CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # a8 needs glibc >= 2.41 (Ubuntu 24.04 has 2.39), so it runs in the project's Debian trixie image
+  # via docker/run.sh, the same command developers use locally.
+  docker-simulation:
+    name: Simulation Build & Test, Docker (wpilib ${{ matrix.wpilib }}, ${{ matrix.preset }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        wpilib: ["2027.0.0a8"]
+        preset: [linux-ci, linux-clang-ci]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure, build, lint and test
+        run: docker/run.sh --wpilib ${{ matrix.wpilib }} cmake --workflow --preset ${{ matrix.preset }}
+
+  sanitizers:
+    name: Sanitizers, Docker (${{ matrix.preset }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [linux-asan-ci, linux-tsan-ci]
+    env:
+      # ThreadSanitizer must be able to disable ASLR, which Docker's default seccomp profile blocks.
+      CPY6107_DOCKER_ARGS: --security-opt seccomp=unconfined
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure, build and test
+        run: docker/run.sh cmake --workflow --preset ${{ matrix.preset }}
+
+  # a6 on the plain Ubuntu runner (glibc 2.39). Windows/macOS presets: see docs/TODO.md.
+  host-simulation:
+    name: Simulation Build & Test (a6, ${{ matrix.preset }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [linux-ci, linux-clang-ci]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install toolchain and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 clang-19 ninja-build
+          python -m venv .venv
+          .venv/bin/pip install --pre "wpilib==2027.0.0a6" nanobind scikit-build-core pytest pytest-cov gcovr ruff mypy clang-format==19.1.7 clang-tidy==19.1.0.1
+
+      - name: Configure, build, lint and test (${{ matrix.preset }})
+        run: |
+          . .venv/bin/activate
+          cmake --workflow --preset ${{ matrix.preset }}
+
+  coverage:
+    name: Coverage (C++ and Python, >= 70%)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install toolchain and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 ninja-build
+          python -m venv .venv
+          .venv/bin/pip install --pre "wpilib==2027.0.0a6" nanobind scikit-build-core pytest pytest-cov gcovr
+
+      - name: C++ line coverage
+        run: |
+          . .venv/bin/activate
+          cmake --preset linux-coverage -DPython_EXECUTABLE=$PWD/.venv/bin/python
+          cmake --build --preset linux-coverage
+          cmake --build --preset linux-coverage --target coverage
+
+      - name: Python coverage
+        run: |
+          . .venv/bin/activate
+          CXX=g++-14 pip install --no-build-isolation --no-deps -e .
+          pytest tests/python
+
+  python-package:
+    name: Python Package Build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Build and install the extension
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 ninja-build
+          pip install --pre "wpilib==2027.0.0a6" nanobind scikit-build-core pytest
+          pip install pytest-cov
+          CXX=g++-14 pip install --no-build-isolation --no-deps -ve .
+          pytest tests/python
+
+  systemcore-cross-compile:
+    name: SystemCore ARM64 Cross-Compile
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ARM64 Cross-Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14-aarch64-linux-gnu ninja-build
+          sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-14 100
+          sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-14 100
+
+      - name: Configure CMake (systemcore-arm64)
+        run: cmake --preset systemcore-arm64
+
+      - name: Build SystemCore ARM64 Target
+        run: cmake --build --preset systemcore-arm64
