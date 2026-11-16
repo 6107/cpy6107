@@ -210,9 +210,12 @@ void TimedCommandRobot::ExecuteLoopCycle() {
     const auto user_start = compat::MonotonicNow();
     LoopBody();
     const auto user_end = compat::MonotonicNow();
-    if (overrun_callback_ && watchdog_.IsExpired()) {
-        const OverrunInfo info{.loop_time = user_end - before_start,
-                               .timeout = watchdog_.GetTimeout()};
+    // Compare elapsed time instead of watchdog_.IsExpired(): the watchdog thread flags expiry
+    // asynchronously and can miss a short loop on a busy host.
+    const auto loop_time = user_end - before_start;
+    if (overrun_callback_ &&
+        std::chrono::duration<double>(loop_time).count() > watchdog_.GetTimeout().value()) {
+        const OverrunInfo info{.loop_time = loop_time, .timeout = watchdog_.GetTimeout()};
         RunHook("overrun callback", [this, &info] { overrun_callback_(info); });
     }
     const LoopTiming timing{.pre_user_time = user_start - before_start,
