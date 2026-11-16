@@ -1,0 +1,9 @@
+{
+  "_comment": "UNTESTED STARTER EXTENSIONS: CLion is the primary tested IDE for this repository.",
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "GitHub.copilot",
+    "GitHub.copilot-chat"
+  ]
+}

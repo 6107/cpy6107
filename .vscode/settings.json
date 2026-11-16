@@ -1,0 +1,12 @@
+{
+  "_comment": "UNTESTED STARTER CONFIG: CLion is the primary tested IDE for this repository.",
+  "cmake.configureOnOpen": true,
+  "cmake.useCMakePresets": "always",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.cppStandard": "c++23",
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "files.associations": {
+    "*.hpp": "cpp",
+    "*.cpp": "cpp"
+  }
+}

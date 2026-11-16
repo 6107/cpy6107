@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "_comment": "UNTESTED STARTER TASKS: CLion is the primary tested IDE for this repository.",
+  "tasks": [
+    {
+      "label": "CMake: Configure & Build Host Simulation (Debug)",
+      "type": "shell",
+      "command": "cmake --preset sim-debug && cmake --build --preset sim-debug",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc", "$msCompile"]
+    },
+    {
+      "label": "CTest: Run Host Simulation Tests",
+      "type": "shell",
+      "command": "ctest --preset sim-debug --output-on-failure",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "CMake: Cross-Compile SystemCore ARM64",
+      "type": "shell",
+      "command": "cmake --preset systemcore-arm64 && cmake --build --preset systemcore-arm64",
+      "group": "build",
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

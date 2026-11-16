@@ -1,0 +1,130 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CPY6107_BUILD_TESTS": "ON",
+        "CPY6107_BUILD_FRAMEWORK": "ON",
+        "CPY6107_BUILD_PYTHON": "ON",
+        "CPY6107_ENABLE_SIM": "ON",
+        "CPY6107_WARNINGS_AS_ERRORS": "ON"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux GCC 14 (Debug)",
+      "description": "Ubuntu 24.04 host simulation build with GCC 14; needs a venv with the robotpy wheels",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++-14"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux GCC 14 (Release)",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "g++-14"
+      }
+    },
+    {
+      "name": "linux-clang-debug",
+      "displayName": "Linux Clang 19 (Debug)",
+      "description": "Ubuntu 24.04 host simulation build with Clang 19",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-clang-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "clang++-19"
+      }
+    },
+    {
+      "name": "linux-coverage",
+      "displayName": "Linux GCC 14 (Debug + coverage)",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/linux-coverage",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++-14",
+        "CPY6107_ENABLE_COVERAGE": "ON",
+        "CPY6107_BUILD_PYTHON": "OFF"
+      }
+    },
+    {
+      "name": "sim-debug",
+      "displayName": "Host Simulation (Debug)",
+      "description": "Generic host build using the default compiler; same options as linux-debug",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/sim-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "sim-release",
+      "displayName": "Host Simulation (Release)",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/sim-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "systemcore-arm64",
+      "displayName": "SystemCore Runtime (ARM64 Linux)",
+      "description": "Cross-compiles core for FRC 2027 SystemCore (Raspberry Pi CM5); framework/Python need aarch64 WPILib libraries and are off until that is supported",
+      "binaryDir": "${sourceDir}/build/systemcore-arm64",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/systemcore-arm64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CPY6107_BUILD_TESTS": "OFF",
+        "CPY6107_BUILD_FRAMEWORK": "OFF",
+        "CPY6107_BUILD_PYTHON": "OFF",
+        "CPY6107_ENABLE_SIM": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug" },
+    { "name": "linux-release", "configurePreset": "linux-release" },
+    { "name": "linux-clang-debug", "configurePreset": "linux-clang-debug" },
+    { "name": "linux-coverage", "configurePreset": "linux-coverage" },
+    { "name": "sim-debug", "configurePreset": "sim-debug" },
+    { "name": "sim-release", "configurePreset": "sim-release" },
+    { "name": "systemcore-arm64", "configurePreset": "systemcore-arm64" }
+  ],
+  "testPresets": [
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-clang-debug",
+      "configurePreset": "linux-clang-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-coverage",
+      "configurePreset": "linux-coverage",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "sim-debug",
+      "configurePreset": "sim-debug",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

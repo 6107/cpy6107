@@ -1,0 +1,28 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Attach
+NamespaceIndentation: None
+PointerAlignment: Left
+ReferenceAlignment: Left
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"cpy6107/'
+    Priority: 1
+  - Regex: '^<frc/|^<wpi/|^<networktables/'
+    Priority: 2
+  - Regex: '^<nanobind/'
+    Priority: 3
+  - Regex: '^<[a-zA-Z0-9_]+>'
+    Priority: 4
+  - Regex: '.*'
+    Priority: 5
