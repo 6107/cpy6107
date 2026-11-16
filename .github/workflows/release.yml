@@ -24,7 +24,7 @@ jobs:
     name: Build sdist and wheel (WPILib from pyproject)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check tag, version and WPILib pin agree
         run: python3 scripts/check_release.py "${GITHUB_REF_NAME}"

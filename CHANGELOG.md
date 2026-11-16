@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The version is
 `<WPILib version>.postN`: `2027.0.0a8.post1` is built against, and requires, `wpilib==2027.0.0a8`.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2027.0.0a8.post1] - Unreleased
+## [2027.0.0a8.post2] - Unreleased
 
 ### Changed
 - Python method names are snake_case (`robot_periodic`, `set_watchdog_timeout`, `before_user_loop`, ...) to match robotpy 2027; the camelCase names are gone.

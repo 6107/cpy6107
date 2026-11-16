@@ -18,7 +18,7 @@ jobs:
         wpilib: ["2027.0.0a8"]
         preset: [linux-ci, linux-clang-ci]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure, build, lint and test
         run: docker/run.sh --wpilib ${{ matrix.wpilib }} cmake --workflow --preset ${{ matrix.preset }}
 
@@ -33,7 +33,7 @@ jobs:
       # ThreadSanitizer must be able to disable ASLR, which Docker's default seccomp profile blocks.
       CPY6107_DOCKER_ARGS: --security-opt seccomp=unconfined
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure, build and test
         run: docker/run.sh cmake --workflow --preset ${{ matrix.preset }}
 
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -70,7 +70,7 @@ jobs:
     name: Coverage (C++ and Python, >= 70%)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -100,7 +100,7 @@ jobs:
     name: Python Package Build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install ARM64 Cross-Compiler
         run: |
