@@ -156,15 +156,21 @@ if(CPY6107_BUILD_PYTHON)
         )
     endif()
 
-    nanobind_add_stub(_cpy6107_stub
-        MODULE _cpy6107
-        OUTPUT _cpy6107.pyi
-        PYTHON_PATH $<TARGET_FILE_DIR:_cpy6107>
-        DEPENDS _cpy6107
-    )
+    if(WIN32)
+        # stubgen imports the extension directly, before robotpy has put the WPILib DLLs on the
+        # DLL search path, so it cannot load here. Ship the tracked stub instead.
+        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/python/cpy6107/_cpy6107.pyi" DESTINATION cpy6107)
+    else()
+        nanobind_add_stub(_cpy6107_stub
+            MODULE _cpy6107
+            OUTPUT _cpy6107.pyi
+            PYTHON_PATH $<TARGET_FILE_DIR:_cpy6107>
+            DEPENDS _cpy6107
+        )
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_cpy6107.pyi DESTINATION cpy6107)
+    endif()
 
     install(TARGETS _cpy6107 LIBRARY DESTINATION cpy6107)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_cpy6107.pyi DESTINATION cpy6107)
 
     # Importable copy of the package built from the current sources: <build>/python/cpy6107.
     # Tests put <build>/python on PYTHONPATH so they never depend on an installed copy.
