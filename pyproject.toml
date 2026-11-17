@@ -9,14 +9,14 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "cpy6107"
-version = "2027.0.0a8.post7" # <WPILib version>.postN; see docs/RELEASING.md
+version = "2027.0.0a8.post8" # <WPILib version>.postN; see docs/RELEASING.md
 description = "C++23 TimedCommandRobot with a settable loop watchdog for FRC 2027 (robotpy), via nanobind"
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.14"
 authors = [{ name = "Jemison CyberJagzz (FRC Team 6107)" }]
-keywords = ["frc", "robotpy", "wpilib", "robotics"]
+keywords = ["frc", "robotpy", "wpilib", "robotics", "watchdog", "nanobind"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -84,3 +84,8 @@ python_version = "3.14"
 strict = true
 mypy_path = "python"
 packages = ["cpy6107"]
+
+[[tool.mypy.overrides]]
+# wpilib ships no stubs on the lint runner, so the base class is Any there.
+module = ["cpy6107._robot"]
+disallow_subclassing_any = false

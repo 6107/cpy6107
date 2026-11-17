@@ -88,7 +88,7 @@ def test_robot_is_a_wpilib_iterative_robot_base() -> None:
 
 def test_robot_can_be_passed_to_wpilib_apis() -> None:
     def takes_robot(base: wpilib.RobotBase) -> bool:
-        return base.is_simulation()
+        return bool(base.is_simulation())
 
     assert takes_robot(Probe())
 

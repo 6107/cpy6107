@@ -103,7 +103,7 @@ use cpy6107 in simulation and unit tests only.
 | "Loop overrun" messages | Your code takes longer than the watchdog timeout. Raise it with `set_watchdog_timeout()` or find the slow code with `add_watchdog_epoch("name")` / `print_watchdog_epochs()`. |
 | `ValueError` from the constructor | `period <= 0` or `scheduler_offset < 0`; both are in seconds, not milliseconds. |
 | A Python exception in a hook ends `start_competition()` | By design: hook exceptions propagate. Catch them in the hook if the robot must keep running. |
-| `isinstance(robot, wpilib.TimedRobot)` is False | Expected: it derives from `IterativeRobotBase`, not `TimedRobot`. |
+| `isinstance(robot, wpilib.TimedRobot)` is False | Expected; see section 3. |
 
 Still stuck? Open an issue; see [CONTRIBUTING.md](../CONTRIBUTING.md#reporting-a-bug).
 
@@ -113,3 +113,5 @@ Still stuck? Open an issue; see [CONTRIBUTING.md](../CONTRIBUTING.md#reporting-a
 * Linux x86_64 only; glibc >= 2.41.
 * No SystemCore / aarch64, Windows or macOS wheels yet.
 * The robotpy a8 API is itself still changing between alphas.
+
+Using it from lib_6107: [LIB_6107_INTEGRATION.md](LIB_6107_INTEGRATION.md).
