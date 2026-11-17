@@ -9,7 +9,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "cpy6107"
-version = "2027.0.0a8.post11" # <WPILib version>.postN; see docs/RELEASING.md
+version = "2027.0.0a8.post13" # <WPILib version>.postN; see docs/RELEASING.md
 description = "C++23 TimedCommandRobot with a settable loop watchdog for FRC 2027 (robotpy), via nanobind"
 readme = "README.md"
 license = "BSD-3-Clause"
