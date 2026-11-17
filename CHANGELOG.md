@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The version is
 `<WPILib version>.postN`: `2027.0.0a8.post1` is built against, and requires, `wpilib==2027.0.0a8`.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2027.0.0a8.post10] - Unreleased
+## [2027.0.0a8.post11] - Unreleased
 
 ### Changed
 - `TimedCommandRobot` is now a Python subclass of `wpilib.IterativeRobotBase` (isinstance checks and
