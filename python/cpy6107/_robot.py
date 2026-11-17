@@ -52,6 +52,31 @@ _HOOKS = (
 )
 
 
+# wpilib 2027 a6 still exposes camelCase names; alias the snake_case ones the loop and tests use.
+_COMPAT_NAMES = (
+    "is_real",
+    "is_simulation",
+    "is_enabled",
+    "is_disabled",
+    "is_autonomous",
+    "is_autonomous_enabled",
+    "is_teleop",
+    "is_teleop_enabled",
+    "is_utility",
+    "is_utility_enabled",
+    "get_period",
+    "get_opmode_id",
+    "get_opmode",
+)
+
+
+def _camel(name: str) -> str:
+    if name.startswith("get_opmode"):
+        return name.replace("get_opmode", "getOpMode").replace("_id", "Id")
+    head, *rest = name.split("_")
+    return head + "".join(part.capitalize() for part in rest)
+
+
 class _Engine(_cpy6107.TimedCommandRobot):
     """The C++ loop; every overridable hook is forwarded to the owning robot."""
 
@@ -158,3 +183,23 @@ class TimedCommandRobot(wpilib.IterativeRobotBase):
 
     def after_user_loop(self, timing: LoopTiming) -> None:
         """Override: runs just after the loop body, outside the watchdog window."""
+
+
+# Hooks are defined here (not inherited) so the engine can always call them, on any wpilib naming.
+def _noop_hook(name: str) -> Callable[[TimedCommandRobot], None]:
+    def hook(self: TimedCommandRobot) -> None:
+        """Override in a subclass."""
+
+    hook.__name__ = name
+    return hook
+
+
+for _name in _HOOKS:
+    setattr(TimedCommandRobot, _name, _noop_hook(_name))
+
+for _name in _COMPAT_NAMES:
+    if not hasattr(wpilib.IterativeRobotBase, _name):
+        for _base in wpilib.IterativeRobotBase.__mro__:
+            if _camel(_name) in vars(_base):
+                setattr(TimedCommandRobot, _name, vars(_base)[_camel(_name)])
+                break
