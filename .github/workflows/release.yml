@@ -1,8 +1,8 @@
 # Release: tag vX -> build sdist + wheel in the glibc 2.41 image -> TestPyPI -> PyPI.
 # Uses PyPI trusted publishing (OIDC); no tokens are stored in the repository.
-# NOT YET EXECUTED. One-time setup (see docs/RELEASING.md): register this workflow as a trusted
-# publisher on pypi.org and test.pypi.org, and create the `testpypi` and `pypi` environments
-# (add required reviewers to `pypi`).
+# One-time setup (see docs/RELEASING.md): register this workflow as a trusted publisher on
+# pypi.org and test.pypi.org, and create the `testpypi` and `pypi` environments (add required
+# reviewers to `pypi`).
 name: Release
 
 on:

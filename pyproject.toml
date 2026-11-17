@@ -9,14 +9,14 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "cpy6107"
-version = "2027.0.0a8.post6" # <WPILib version>.postN; see docs/RELEASING.md
+version = "2027.0.0a8.post7" # <WPILib version>.postN; see docs/RELEASING.md
 description = "C++23 TimedCommandRobot with a settable loop watchdog for FRC 2027 (robotpy), via nanobind"
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.14"
 authors = [{ name = "Jemison CyberJagzz (FRC Team 6107)" }]
-keywords = ["frc", "robotpy", "wpilib", "robotics", "watchdog", "nanobind"]
+keywords = ["frc", "robotpy", "wpilib", "robotics"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

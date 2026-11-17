@@ -76,8 +76,8 @@ cmake --build --preset linux-debug-format     # reformat C++ and Python in place
 The repository `.venv` is used automatically for Python and the tools (clang-format and clang-tidy
 are pip packages); activate it (or put `.venv/bin` on `PATH`) so CMake also finds `ninja`.
 
-Windows (PowerShell, **not verified** — no Windows host available; the robotpy-native DLL/import
-library layout in `cmake/FindRobotpyNative.cmake` is untested):
+Windows (PowerShell). The sdist builds with MSVC (`uv sync`); `cmake/FindRobotpyNative.cmake` uses
+the wheels' `.dll`/`.lib` pairs. Runtime verification is still in progress:
 ```powershell
 .venv\Scripts\Activate.ps1
 cmake --workflow --preset windows-ci          # from a Developer PowerShell (MSVC, /W4 /WX)

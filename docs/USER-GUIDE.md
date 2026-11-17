@@ -49,9 +49,11 @@ if __name__ == "__main__":
     wpilib.run(Robot)
 ```
 
-`wpilib.run()` is duck-typed: it constructs the class and calls `start_competition()`. The
-class does **not** derive from `wpilib.TimedRobot`, so `isinstance(robot, wpilib.TimedRobot)` is
-`False` (nanobind and pybind11 types cannot inherit from each other).
+`TimedCommandRobot` is a real `wpilib.IterativeRobotBase` (and so a `wpilib.RobotBase`):
+`isinstance` checks pass and it can be given to WPILib APIs that take a robot. It is **not** a
+`wpilib.TimedRobot`. nanobind classes cannot inherit from robotpy's pybind11 types, so the Python
+class in `python/cpy6107/_robot.py` subclasses the WPILib base and delegates the loop to a private
+C++ engine that calls back into it.
 
 Constructor arguments are in **seconds**: `TimedCommandRobot(period=0.02, scheduler_offset=0.005)`.
 A `period <= 0` or `scheduler_offset < 0` raises `ValueError`.
@@ -247,7 +249,7 @@ The loop runs in C++ on the thread that called `start_competition()`.
 | --- | --- |
 | Setting a watchdog has no effect (the base watchdog is private) | `set_watchdog_timeout(seconds)` works |
 | `loopFunc` / logging around the loop | `before_user_loop()` / `after_user_loop(timing)` |
-| Base class `IterativeRobotBase` (Python) | `TimedCommandRobot` (C++); not a `wpilib` subclass, pass to `wpilib.run` as usual |
+| Base class `IterativeRobotBase` (Python) | `TimedCommandRobot` (a `wpilib.IterativeRobotBase` subclass; pass to `wpilib.run` as usual) |
 | Scheduler registered via `add_periodic` | `set_scheduler(callable)` with a dedicated offset slot |
 
 Steps: change the base class, move logging code into `before_user_loop` / `after_user_loop`,

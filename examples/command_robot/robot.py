@@ -15,7 +15,8 @@
 #    Jemison High School - Huntsville Alabama                              #
 # ------------------------------------------------------------------------ #
 
-"""Minimal command-based robot built on cpy6107.TimedCommandRobot.
+"""
+Minimal command-based robot built on cpy6107.TimedCommandRobot.
 
 Run in simulation with the robotpy CLI (``robotpy sim``) or hand ``Robot`` to ``wpilib.run``.
 """

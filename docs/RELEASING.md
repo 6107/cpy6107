@@ -88,7 +88,7 @@ If PyPI is not wanted, attach `dist/*` to GitHub Releases or upload to a private
 ## 7. Not yet covered
 
 * Windows (`win_amd64`, delvewheel) and macOS (`universal2`, delocate) wheels: the WPILib wheels
-  exist but the build has not been verified there (PLAN-2 steps 7 and 8f).
+  exist; the sdist now builds with MSVC on Windows 11 via `uv sync` (runtime verification and a
+  delvewheel wheel are still open; PLAN-2 steps 7 and 8f).
 * Linux aarch64 (SystemCore): needs an ARM64 build host or qemu (PLAN-2 step 7).
 * Python 3.14t (free-threaded) wheels: PLAN-2 step 10.
-* `release.yml` has **never been run**.

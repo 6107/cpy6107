@@ -8,6 +8,7 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 
 import pytest
+import wpilib
 
 import cpy6107
 from cpy6107 import HookErrorPolicy, LoopTiming, OverrunInfo, TimedCommandRobot
@@ -75,6 +76,21 @@ def test_module_exports() -> None:
     assert set(cpy6107.__all__) >= {"TimedCommandRobot", "LoopTiming"}
     assert pytest.approx(0.02) == TimedCommandRobot.DEFAULT_PERIOD
     assert pytest.approx(0.005) == TimedCommandRobot.SCHEDULER_OFFSET
+
+
+def test_robot_is_a_wpilib_iterative_robot_base() -> None:
+    robot = TimedCommandRobot()
+    assert isinstance(robot, wpilib.IterativeRobotBase)
+    assert isinstance(robot, wpilib.RobotBase)
+    assert issubclass(Probe, wpilib.IterativeRobotBase)
+    assert robot.is_simulation() and not robot.is_real()
+
+
+def test_robot_can_be_passed_to_wpilib_apis() -> None:
+    def takes_robot(base: wpilib.RobotBase) -> bool:
+        return base.is_simulation()
+
+    assert takes_robot(Probe())
 
 
 def test_constructor_defaults_and_arguments() -> None:

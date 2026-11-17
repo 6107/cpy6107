@@ -4,9 +4,19 @@ All notable changes to this project are documented here. The version is
 `<WPILib version>.postN`: `2027.0.0a8.post1` is built against, and requires, `wpilib==2027.0.0a8`.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2027.0.0a8.post6] - Unreleased
+## [2027.0.0a8.post7] - Unreleased
+
+[2027.0.0a8.post6]
+
+### Fixed
+- Windows (MSVC) build: `IMPORTED_IMPLIB` for the WPILib import libraries, `/Zc:preprocessor` for
+  WPILib's `__VA_OPT__` macros, and the tracked stub is installed instead of generated.
+- Release workflow: exec bits on `docker/*.sh`, `actions/checkout@v5`, Scorecard v2.5.0, `-Wcomment`
+  banner fix, deterministic overrun detection.
 
 ### Changed
+- `TimedCommandRobot` is now a Python subclass of `wpilib.IterativeRobotBase` (isinstance checks and
+  WPILib APIs work) that delegates the loop to a private C++ engine (`python/cpy6107/_robot.py`).
 - Python method names are snake_case (`robot_periodic`, `set_watchdog_timeout`, `before_user_loop`, ...) to match robotpy 2027; the camelCase names are gone.
 
 ### Added

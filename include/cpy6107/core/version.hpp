@@ -21,6 +21,7 @@
 
 namespace cpy6107::core {
 
+// TODO: Hook into same version string as pyproject.toml
 constexpr std::string_view kVersion = "0.1.0-frc2027";
 
 [[nodiscard]] constexpr bool IsSimulationBuild() noexcept {

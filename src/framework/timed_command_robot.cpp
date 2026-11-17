@@ -206,13 +206,17 @@ void TimedCommandRobot::RunHook(const char* name, const F& hook) {
 
 void TimedCommandRobot::ExecuteLoopCycle() {
     const auto before_start = compat::MonotonicNow();
+
     RunHook("before_user_loop", [this] { BeforeUserLoop(); });
     const auto user_start = compat::MonotonicNow();
+
     LoopBody();
+
     const auto user_end = compat::MonotonicNow();
     // Compare elapsed time instead of watchdog_.IsExpired(): the watchdog thread flags expiry
     // asynchronously and can miss a short loop on a busy host.
     const auto loop_time = user_end - before_start;
+
     if (overrun_callback_ &&
         std::chrono::duration<double>(loop_time).count() > watchdog_.GetTimeout().value()) {
         const OverrunInfo info{.loop_time = loop_time, .timeout = watchdog_.GetTimeout()};
@@ -266,8 +270,8 @@ void TimedCommandRobot::LoopBody() {
 
         last_mode_ = static_cast<int>(mode);
     }
-
     HAL_ObserveUserProgram(word.GetValue());
+
     if (mode == RobotMode::UNKNOWN) {
         DisabledPeriodic();
         watchdog_.AddEpoch("DisabledPeriodic()");
@@ -281,7 +285,6 @@ void TimedCommandRobot::LoopBody() {
         UtilityPeriodic();
         watchdog_.AddEpoch("UtilityPeriodic()");
     }
-
     RobotPeriodic();
     watchdog_.AddEpoch("RobotPeriodic()");
 

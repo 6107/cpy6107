@@ -75,8 +75,8 @@ Things that differ from `wpilib.TimedRobot`:
 * Method names are the 2027 snake_case names (`robot_periodic`, `teleop_init`, ...). A misspelled
   override is silently never called, so double-check names against `python/cpy6107/_cpy6107.pyi`.
 * Times are in seconds.
-* It is not a `wpilib.RobotBase` subclass; `is_enabled()`, `is_disabled()`, `is_simulation()` and
-  friends are available on it.
+* It is a `wpilib.IterativeRobotBase` subclass (not `TimedRobot`); `is_enabled()`,
+  `is_disabled()`, `is_simulation()` and friends are inherited.
 * Do not call `set_scheduler()` **and** run the scheduler yourself in `robot_periodic`.
 
 ## 4. Run it in simulation
@@ -103,7 +103,7 @@ use cpy6107 in simulation and unit tests only.
 | "Loop overrun" messages | Your code takes longer than the watchdog timeout. Raise it with `set_watchdog_timeout()` or find the slow code with `add_watchdog_epoch("name")` / `print_watchdog_epochs()`. |
 | `ValueError` from the constructor | `period <= 0` or `scheduler_offset < 0`; both are in seconds, not milliseconds. |
 | A Python exception in a hook ends `start_competition()` | By design: hook exceptions propagate. Catch them in the hook if the robot must keep running. |
-| `isinstance(robot, wpilib.TimedRobot)` is False | Expected; see section 3. |
+| `isinstance(robot, wpilib.TimedRobot)` is False | Expected: it derives from `IterativeRobotBase`, not `TimedRobot`. |
 
 Still stuck? Open an issue; see [CONTRIBUTING.md](../CONTRIBUTING.md#reporting-a-bug).
 
@@ -113,5 +113,3 @@ Still stuck? Open an issue; see [CONTRIBUTING.md](../CONTRIBUTING.md#reporting-a
 * Linux x86_64 only; glibc >= 2.41.
 * No SystemCore / aarch64, Windows or macOS wheels yet.
 * The robotpy a8 API is itself still changing between alphas.
-
-Using it from lib_6107: [LIB_6107_INTEGRATION.md](LIB_6107_INTEGRATION.md).

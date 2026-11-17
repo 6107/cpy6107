@@ -31,7 +31,8 @@ if sys.platform == "win32":
 # loader reuses them (and so both share one HAL / NetworkTables instance).
 import wpilib as _wpilib  # noqa: F401
 
-from ._cpy6107 import HookErrorPolicy, LoopTiming, OverrunInfo, TimedCommandRobot
+from ._cpy6107 import HookErrorPolicy, LoopTiming, OverrunInfo
+from ._robot import TimedCommandRobot
 
 __all__ = [
     "HookErrorPolicy",

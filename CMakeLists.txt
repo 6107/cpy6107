@@ -180,6 +180,7 @@ if(CPY6107_BUILD_PYTHON)
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CPY6107_PYTHON_STAGE_DIR}/cpy6107"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_CURRENT_SOURCE_DIR}/python/cpy6107/__init__.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/python/cpy6107/_robot.py"
                 "${CMAKE_CURRENT_SOURCE_DIR}/python/cpy6107/py.typed"
                 $<TARGET_FILE:_cpy6107>
                 "${CPY6107_PYTHON_STAGE_DIR}/cpy6107"

@@ -20,6 +20,8 @@
 namespace cpy6107::core {
 
 std::string_view GetBuildBanner() noexcept {
+    // TODO: Hook into same version string as pyproject.toml
+
     if constexpr (IsSimulationBuild()) {
         return "cpy6107 0.1.0 (FRC 2027 - Host Simulation)";
     } else {
